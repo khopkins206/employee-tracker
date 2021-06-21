@@ -5,7 +5,7 @@ require(`console.table`)
 
 const init = () => {
   inquirer.prompt({
-    name: "action",
+    name: "main",
     type: "list",
     message: "What do you need to do?",
     choices: [
@@ -19,7 +19,7 @@ const init = () => {
       "Exit",
     ]
   }).then((choice) => {
-    switch (choice.action) {
+    switch (choice.main) {
       case "Add Department":
         addDept();
         break;
@@ -30,13 +30,13 @@ const init = () => {
         addEmp();
         break;
       case "View All Departments":
-        runQuery(`SELECT name AS department FROM employeetracker_db.department;`)
+        viewDept();
         break;
       case "View All Roles":
-        runQuery(`SELECT `)
+        viewRole();
         break;
       case "View All Employees":
-        runQuery(`SELECT `)
+        viewEmp();
         break;
       case "Update Employee Role":
         updateRole();
@@ -45,7 +45,7 @@ const init = () => {
         connection.end();
         break;
       default:
-        console.log("Please Try Again: ${choice.action}");
+        console.log("Please Try Again: ${choice.main}");
         break;
     }
   }).catch((err) => console.err(err))
@@ -59,43 +59,76 @@ const runQuery = (query) => {
   });
 };
 
-const addDept =
+const addDept = () => {
+  inquirer.prompt([{
+    type: "input",
+    name: "department_id",
+    message: "What is the Department Name?"
+  }]).then((answer) => {
+    connection.query("INSERT INTO department SET ?", department, () => {
+      init()
+    })
+  })
+};
 
-const addRole =
+const addRole = () => {
+  connection.query("SELECT name AS value FROM department", (error, departmentName) => {
+    inquirer.prompt([{
+      type: "input",
+      name: "title",
+      message: "What is the title?"
+    }, {
+      type: "input",
+      name: "salary",
+      message: "What is the salary?"
+    }, {
+      type: "list",
+      name: "department_id",
+      message: "What is the department?",
+      choices: departmentName
+    }]).then((role) => {
+      connection.query("INSERT INTO role SET ?", department, () => {
+        init()
+      })
+    })
+  })
+};
 
 const addEmp = () => {
-      connection.query(`SELECT title FROM employeetracker_DB.role`, (err, res) => {
-        if (err) throw err;
+  connection.query(`SELECT * FROM employeetracker_db.role`, (err, res) => {
+    if (err) throw err;
 
-        inquirer.prompt([{
-          type: "input",
-          name: "first_name",
-          message: "What is the employee's first name?"
-        }, {
-          type: "input",
-          name: "last_name",
-          message: "What is the employee's last name?"
-        }, {
-          type: "input",
-          name: "emp_role",
-          message: "What is the employee's role?",
-        }, {
-          type: "input",
-          name: "manager_id",
-          message: "What is the manager's ID?"
-          }]).then((answer) => {
-            let firstName = answer.first_name;
-            let lastName = answer.last_name;
-            let empRole = answer.emp_role;
-            let managerID = answer.manager_id;
-            
-      connection.query(`INSERT INTO employee (first_name, last_name, role_id, manager_id) VALUE ('${firstName}', '${lastName}', '${empRole}', '${managerID}')`; (err, res) => {
+    inquirer.prompt([{
+      type: "input",
+      name: "first_name",
+      message: "What is the employee's first name?"
+    }, {
+      type: "input",
+      name: "last_name",
+      message: "What is the employee's last name?"
+    }, {
+      type: "list",
+      name: "role_id",
+      message: "What is the employee's role?",
+      // choices: [{ name: , value: res.map.id}]
+    }, {
+      type: "list",
+      name: "manager_id",
+      message: "What is the manager's ID?",
+      choices: ""
+    }]).then((answer) => {
+      let firstName = answer.first_name;
+      let lastName = answer.last_name;
+      let empRole = answer.role_id;
+      let manager = answer.manager_id;
+
+      connection.query(`INSERT INTO employee SET ? `);
+      (err, res) => {
         if (err) throw err;
         console.table(res);
         init();
-      });
-        }
-      )
-    }
+      };
+    })
+  };
 
 const updateRole =
