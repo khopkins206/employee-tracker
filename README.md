@@ -30,7 +30,7 @@ NPM i inquirer, mysql, console.table
 # Usage
 
 When making changes in your company, you can add, update, or view your current employees, roles, and departments
-![Employee Tracker play-through](assets/tracker.gif)
+![Employee Tracker play-through](Assets/tracker.gif)
 
 # Contributions
 
