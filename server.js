@@ -38,8 +38,9 @@ const init = () => {
           break;
         case "View All Roles":
           connection.query(
-            "SELECT * FROM role JOIN department on role.department_id = department_id",
+            "SELECT role.id, title, salary, department.name AS department_name FROM role LEFT JOIN department ON role.department_id = department.id",
             (error, data) => {
+              console.log(error);
               console.table(data);
               init();
             }
@@ -70,12 +71,12 @@ const addDept = () => {
     .prompt([
       {
         type: "input",
-        name: "department_id",
+        name: "name",
         message: "What is the Department Name?",
       },
     ])
     .then((department) => {
-      connection.query("INSERT INTO department SET ?", department, () => {
+      connection.query("INSERT INTO department SET ?", department, (error) => {
         init();
       });
     });
@@ -84,7 +85,7 @@ const addDept = () => {
 const addRole = () => {
   connection.query(
     "SELECT name, id AS value FROM department",
-    (error, departmentID) => {
+    (error, departmentNames) => {
       inquirer
         .prompt([
           {
@@ -101,7 +102,7 @@ const addRole = () => {
             type: "list",
             name: "department_id",
             message: "What is the department ID?",
-            choices: departmentID,
+            choices: departmentNames,
           },
         ])
         .then((role) => {
@@ -117,44 +118,49 @@ const addEmp = () => {
   connection.query(
     `SELECT id AS value, title AS name FROM role`,
     (err, roles) => {
-      connection.query(
-        "SELECT id AS value, first_name AS name AS value FROM employee WHERE manager_id is NULL",
-        (error, managers) => {
-          inquirer
-            .prompt([
-              {
-                type: "input",
-                name: "first_name",
-                message: "What is the employee's first name?",
-              },
-              {
-                type: "input",
-                name: "last_name",
-                message: "What is the employee's last name?",
-              },
-              {
-                type: "list",
-                name: "role_id",
-                message: "What is the employee's role?",
-                choices: roles,
-              },
-              {
-                type: "list",
-                name: "manager_id",
-                message: "Who is their manager?",
-                choices: [{ id: null, name: "None" }].concat(managers),
-              },
-            ])
-            .then((answer) => {
-              connection.query("INSERT INTO employee SET ?", employee, () => {
-                init();
-              });
-            });
-        }
-      );
+      // connection.query(
+      //   "SELECT id AS value, first_name AS name AS value FROM employee WHERE manager_id is NULL",
+      //   (error, managers) => {
+      inquirer
+        .prompt([
+          {
+            type: "input",
+            name: "first_name",
+            message: "What is the employee's first name?",
+          },
+          {
+            type: "input",
+            name: "last_name",
+            message: "What is the employee's last name?",
+          },
+          {
+            type: "list",
+            name: "role_id",
+            message: "What is the employee's role?",
+            choices: roles,
+          },
+          // {
+          //   type: "list",
+          //   name: "manager_id",
+          //   message: "Who is their manager?",
+          //   choices: [
+          //     {
+          //       id: null,
+          //       name: "None",
+          //     },
+          //   ].concat(managers),
+          // },
+        ])
+        .then((employee) => {
+          connection.query("INSERT INTO employee SET ?", employee, (error) => {
+            init();
+          });
+        });
     }
   );
 };
+// );
+// };
 
 const updateRole = () => {
   connection.query(
